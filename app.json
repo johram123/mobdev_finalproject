@@ -4,6 +4,7 @@
     "slug": "mobdev_finalproject",
     "version": "1.0.0",
     "orientation": "portrait",
+    "plugins": [["expo-router"]],
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
