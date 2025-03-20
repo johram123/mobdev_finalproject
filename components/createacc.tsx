@@ -1,7 +1,14 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Button } from "react-native";
+import { useFonts, Unbounded_400Regular,Unbounded_700Bold } from "@expo-google-fonts/unbounded";
+
 
 const CreateAccount: React.FC<{ navigateBack: any }> = ({ navigateBack }) => {
+  let [fontsLoaded] = useFonts({
+    Unbounded_Regular: Unbounded_400Regular,
+    Unbounded_Bold: Unbounded_700Bold,
+  });
+
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -80,11 +87,10 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   heading: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 15,
     marginBottom: 5,
     color: "#04b4d1",
-
+    fontFamily: "Unbounded_Bold",
   },
   inputName: {
     width: 125,
@@ -104,10 +110,10 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   title: {
-    fontSize: 40,
-    fontWeight: "bold",
+    fontSize: 80,
     marginBottom: 20,
     color: "#04b4d1",
+    fontFamily: "Unbounded_Bold",
   },
   createButton: {
     marginTop: 30,

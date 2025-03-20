@@ -1,4 +1,6 @@
 import { View, Text, StyleSheet, Button, TextInput, TouchableOpacity } from "react-native";
+import { useFonts, Unbounded_400Regular,Unbounded_700Bold } from "@expo-google-fonts/unbounded";
+
 import React, { useState } from "react";
 
 type SigninProps = {
@@ -8,6 +10,12 @@ type SigninProps = {
 };
 
 const Signin: React.FC<SigninProps> = ({ booleanToggle, setUsername, navigateToCreateAcc }) => {
+
+  let [fontsLoaded] = useFonts({
+    Unbounded_Regular: Unbounded_400Regular,
+    Unbounded_Bold: Unbounded_700Bold,
+  });
+
   const [username, setUserInput] = useState<string>("");  
   const [password, setPassword] = useState<string>("");  
 
@@ -72,7 +80,7 @@ const style = StyleSheet.create({
   },
   heading: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily: "Unbounded_Bold",
     marginBottom: 5,
   },
   input: {
@@ -85,9 +93,9 @@ const style = StyleSheet.create({
   },
   title: {
     fontSize: 80,
-    fontWeight: "bold",
     marginBottom: 20,
     color: "#04b4d1",
+    fontFamily: "Unbounded_Bold",
   },
   loginButton: {
     marginTop: 70,
@@ -109,10 +117,12 @@ const style = StyleSheet.create({
     alignItems: "center",
   },
   footerText: {
+    fontFamily: "Unbounded_regular",
     fontSize: 16,
     color: "#000",
   },
   signUpText: {
+    fontFamily: "Unbounded_regular",
     fontSize: 16,
     color: "#04b4d1",
     fontWeight: "bold",
