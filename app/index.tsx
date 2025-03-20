@@ -1,10 +1,26 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet, View } from "react-native";
+import Signin from "../components/signin";
+import CreateAcc from "../components/createacc"; 
+import { useState } from "react";
 
 export default function App() {
+  const [currentScreen, setCurrentScreen] = useState<string>("Signin"); 
+  const [username, setUsername] = useState<string>("");
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); 
+
   return (
     <View style={styles.container}>
-      <Text style={styles.welcomeText}>Welcome to the App!</Text>
+      <StatusBar style="auto" />
+      {currentScreen === "Signin" ? (
+        <Signin
+          booleanToggle={setIsLoggedIn} 
+          setUsername={setUsername}
+          navigateToCreateAcc={() => setCurrentScreen("CreateAcc")} 
+        />
+      ) : (
+        <CreateAcc navigateBack={() => setCurrentScreen("Signin")} /> 
+      )}
     </View>
   );
 }
@@ -14,11 +30,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F5FCFF",
-  },
-  welcomeText: {
-    fontSize: 20,
-    textAlign: "center",
-    margin: 10,
+    padding: 16,
+    backgroundColor: "#f5f5f5",
   },
 });
