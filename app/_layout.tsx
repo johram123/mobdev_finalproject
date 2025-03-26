@@ -11,11 +11,14 @@ export default function TabsLayout() {
           backgroundColor: "#0484D1",
           justifyContent: "center",
           alignItems: "center",
+          height: "10 %",
+          borderTopWidth: 0,
+          elevation: 0,
         },
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
           tabBarLabel: "",
           tabBarIcon: () => <Image source={require("../assets/home.png")} />,
