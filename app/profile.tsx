@@ -1,5 +1,8 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet, View } from "react-native";
+import Signin from "../components/signin";
+import CreateAcc from "../components/createacc";
+import { useState } from "react";
 
 const Profile = () => {
   return (
