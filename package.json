@@ -10,11 +10,13 @@
   },
   "dependencies": {
     "@expo-google-fonts/unbounded": "^0.2.3",
+    "@supabase/supabase-js": "^2.49.3",
     "expo": "~52.0.38",
     "expo-router": "^4.0.19",
     "expo-status-bar": "~2.0.1",
     "react": "18.3.1",
-    "react-native": "0.76.7"
+    "react-native": "0.76.7",
+    "supabase": "^2.20.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

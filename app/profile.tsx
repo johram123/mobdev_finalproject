@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import Signin from "../components/signin";
 import CreateAcc from "../components/createacc";
 import { useState } from "react";

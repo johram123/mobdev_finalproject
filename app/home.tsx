@@ -7,7 +7,7 @@ import {
 } from "@expo-google-fonts/unbounded";
 import { useState } from "react";
 
-export default function App() {
+export default function Home() {
   let [fontsLoaded] = useFonts({
     Unbounded_Regular: Unbounded_400Regular,
     Unbounded_Bold: Unbounded_700Bold,

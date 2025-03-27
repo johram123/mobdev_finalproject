@@ -1,29 +1,42 @@
-import { View, Text, StyleSheet, Button, TextInput, TouchableOpacity } from "react-native";
-import { useFonts, Unbounded_400Regular,Unbounded_700Bold } from "@expo-google-fonts/unbounded";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Button,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
+import {
+  useFonts,
+  Unbounded_400Regular,
+  Unbounded_700Bold,
+} from "@expo-google-fonts/unbounded";
 
 import React, { useState } from "react";
 
 type SigninProps = {
-  booleanToggle: (isLoggedIn: boolean) => void;  
-  setUsername: (username: string) => void;       
-  navigateToCreateAcc: () => void;               
+  booleanToggle: (isLoggedIn: boolean) => void;
+  setUsername: (username: string) => void;
+  navigateToCreateAcc: () => void;
 };
 
-const Signin: React.FC<SigninProps> = ({ booleanToggle, setUsername, navigateToCreateAcc }) => {
-
+const Signin: React.FC<SigninProps> = ({
+  booleanToggle,
+  setUsername,
+  navigateToCreateAcc,
+}) => {
   let [fontsLoaded] = useFonts({
     Unbounded_Regular: Unbounded_400Regular,
     Unbounded_Bold: Unbounded_700Bold,
   });
 
-  const [username, setUserInput] = useState<string>("");  
-  const [password, setPassword] = useState<string>("");  
+  const [username, setUserInput] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
-  
   const handleSubmit = () => {
     if (username && password) {
-      setUsername(username);  
-      booleanToggle(true);    
+      setUsername(username);
+      booleanToggle(true);
     } else {
       alert("Please enter both username and password.");
     }
@@ -99,8 +112,8 @@ const style = StyleSheet.create({
   },
   loginButton: {
     marginTop: 70,
-    borderRadius: 25, 
-    backgroundColor: "#04b4d1", 
+    borderRadius: 25,
+    backgroundColor: "#04b4d1",
     paddingVertical: 10,
     paddingHorizontal: 20,
     alignItems: "center",
