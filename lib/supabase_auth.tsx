@@ -33,14 +33,16 @@ export const AuthContextProvider = ({
       throw new Error("User not found");
     }
 
+    if (error) {
+      alert("Error signing up");
+    }
     await insertUser({
       user_id: user.id,
       password: password,
       email: email,
     });
 
-    console.log("User: ", data);
-    return data;
+    return user;
   }
 
   async function signIn(email: string, password: string) {

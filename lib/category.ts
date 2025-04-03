@@ -3,7 +3,17 @@ import supabase from "./supabase";
 const TABLE_NAME = "category";
 
 export async function getCategory() {
-  const { data, error } = await supabase.from(TABLE_NAME).select("*");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
+
+  const { data, error } = await supabase
+    .from(TABLE_NAME)
+    .select("*")
+    .eq("user_id", user.id);
   if (error) {
     throw error;
   }

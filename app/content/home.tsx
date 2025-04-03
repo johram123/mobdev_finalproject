@@ -5,18 +5,21 @@ import {
   View,
   Text,
   StyleSheet,
-  Button,
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Alert,
 } from "react-native";
+import {
+  useFonts,
+  Unbounded_400Regular,
+  Unbounded_700Bold,
+} from "@expo-google-fonts/unbounded";
 import { AntDesign } from "@expo/vector-icons";
 import { getCategory } from "../../lib/category";
-import CategoryHandler from "../../components/categoryhandler";
-import { createCategory } from "../../lib/category";
 import { useAuth } from "../../lib/supabase_auth";
 import { useRouter } from "expo-router";
+import CategoryHandler from "../../components/categoryhandler";
+import DeleteHandler from "../../components/deletehandler";
 
 interface Category {
   category_id: number;
@@ -43,7 +46,11 @@ export default function Home() {
   };
 
   const handleCategoryAdded = () => {
-    fetchCategories(); // Refresh the categories after a new one is added
+    fetchCategories();
+  };
+
+  const handleCategoryPage = (categoryId: number) => {
+    console.log("Category pressed:", categoryId);
   };
 
   useEffect(() => {
@@ -93,16 +100,25 @@ export default function Home() {
                     No categories yet. Add one!
                   </Text>
                 ) : (
-                  categories.map((category) => (
-                    <TouchableOpacity
-                      key={category.category_id}
-                      style={styles.category}
-                    >
-                      <Text style={styles.textStyle}>
-                        {category.category_Name}
-                      </Text>
-                    </TouchableOpacity>
-                  ))
+                  <View style={styles.categoryGrid}>
+                    {categories.map((category) => (
+                      <TouchableOpacity
+                        key={category.category_id}
+                        style={styles.categoryBox}
+                        onPress={() => handleCategoryPage(category.category_id)}
+                      >
+                        <Text style={styles.categoryText} numberOfLines={1}>
+                          {category.category_Name}
+                        </Text>
+                        <View style={styles.deleteButtonContainer}>
+                          <DeleteHandler
+                            categoryId={category.category_id}
+                            onDeleteSuccess={fetchCategories}
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
                 )}
               </ScrollView>
             )}
@@ -110,7 +126,6 @@ export default function Home() {
         </View>
       </View>
 
-      {/* Call the CategoryHandler component */}
       <CategoryHandler
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}
@@ -168,10 +183,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,
@@ -186,21 +197,39 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     width: "100%",
   },
-  category: {
+  categoryGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    width: "100%",
+  },
+  categoryBox: {
+    width: "40%",
+    height: 120,
     backgroundColor: "#0484D1",
-    width: "70%",
-    minHeight: 100,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 20,
-    marginVertical: 10,
-    padding: 15,
+    margin: 10,
+    padding: 10,
+    position: "relative",
   },
-  textStyle: {
-    fontSize: 20,
+  categoryText: {
+    fontSize: 16,
     fontFamily: "Unbounded_Regular",
     color: "white",
     textAlign: "center",
+    overflow: "hidden",
+  },
+  deleteButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "transparent",
+    padding: 5,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
   },
   loader: {
     marginTop: 50,
@@ -210,5 +239,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#666",
     marginTop: 50,
+  },
+  deleteButtonContainer: {
+    position: "absolute",
+    top: 10,
+    right: 10,
   },
 });
