@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native"
 import { useFonts, Unbounded_400Regular, Unbounded_700Bold } from "@expo-google-fonts/unbounded"
 import { AntDesign } from "@expo/vector-icons"
-import { getCategory, deleteCategory } from "../lib/category" 
+import { getCategory} from "../lib/category" 
 import CategoryHandler from "../components/categoryhandler"
 import DeleteHandler from "../components/deletehandler"
 
@@ -99,7 +99,7 @@ export default function Home() {
                         style={styles.categoryBox}
                         onPress={() => handleCategoryPage(category.category_id)}
                       >
-                        <Text style={styles.categoryText} numberOfLines={1}>
+                        <Text style={styles.categoryText}>
                           {category.category_Name}
                         </Text>
                         <View style={styles.deleteButtonContainer}>
