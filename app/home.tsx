@@ -1,17 +1,16 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native"
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from "react-native"
 import { useFonts, Unbounded_400Regular, Unbounded_700Bold } from "@expo-google-fonts/unbounded"
 import { AntDesign } from "@expo/vector-icons"
 import { getCategory } from "../lib/category"
-import { createCategory } from "../lib/category"
 import CategoryHandler from "../components/categoryhandler"
+import { createCategory } from "../lib/category"
 
 interface Category {
   category_id: number
   category_Name: string
-  created_at: string
 }
 
 export default function Home() {
@@ -34,6 +33,10 @@ export default function Home() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleCategoryAdded = () => {
+    fetchCategories() // Refresh the categories after a new one is added
   }
 
   useEffect(() => {
@@ -69,7 +72,10 @@ export default function Home() {
           <View style={styles.categoryContainer}>
             <View style={styles.categoryHeader}>
               <Text style={styles.categoryTitle}>My Categories</Text>
-              <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => setModalVisible(true)}
+              >
                 <AntDesign name="plus" size={24} color="#0484D1" />
               </TouchableOpacity>
             </View>
@@ -82,9 +88,9 @@ export default function Home() {
                   <Text style={styles.noCategories}>No categories yet. Add one!</Text>
                 ) : (
                   categories.map((category) => (
-                    <View key={category.category_id} style={styles.category}>
+                    <TouchableOpacity key={category.category_id} style={styles.category}>
                       <Text style={styles.textStyle}>{category.category_Name}</Text>
-                    </View>
+                    </TouchableOpacity>
                   ))
                 )}
               </ScrollView>
@@ -93,10 +99,11 @@ export default function Home() {
         </View>
       </View>
 
+      {/* Call the CategoryHandler component */}
       <CategoryHandler
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}
-        onCategoryAdded={fetchCategories}
+        onCategoryAdded={handleCategoryAdded}
       />
     </View>
   )
@@ -171,21 +178,18 @@ const styles = StyleSheet.create({
   category: {
     backgroundColor: "#0484D1",
     width: "70%",
-    height: 100, // Fixed height
+    minHeight: 100,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 20,
     marginVertical: 10,
-    paddingHorizontal: 15, // Only horizontal padding
+    padding: 15,
   },
   textStyle: {
     fontSize: 20,
     fontFamily: "Unbounded_Regular",
     color: "white",
     textAlign: "center",
-    width: "100%", // Take full width
-    overflow: "hidden", // Prevent overflow
-    flexWrap: "wrap", // Allow text wrapping
   },
   loader: {
     marginTop: 50,

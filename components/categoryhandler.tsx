@@ -130,14 +130,14 @@ const styles = StyleSheet.create({
   },
   category: {
     backgroundColor: "#0484D1",
-    width: "70%", // Fixed width
-    minHeight: 100, // Fixed minimum height
+    width: "70%", 
+    minHeight: 100, 
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 20,
     marginVertical: 10,
-    padding: 15, // Fixed padding
-    overflow: "hidden", // Prevent content overflow
+    padding: 15, 
+    overflow: "hidden", 
   },
   textStyle: {
     fontSize: 20,
