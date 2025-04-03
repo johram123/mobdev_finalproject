@@ -143,8 +143,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: "Unbounded_Regular",
     color: "white",
-    textAlign: "center", // Center the text
-    overflow: "hidden", // Prevent text overflow
+    textAlign: "center", 
+    overflow: "hidden", 
   },
 })
 
