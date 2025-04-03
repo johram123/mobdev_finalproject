@@ -29,6 +29,7 @@ export async function insertUser(user: {
     .from(TABLE_NAME)
     .insert([{ user_id: user_id, password: password, email: email }]);
   if (error) {
+    console.error("Error inserting user: ", error);
     throw error;
   }
 

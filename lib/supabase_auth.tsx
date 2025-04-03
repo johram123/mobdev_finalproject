@@ -25,26 +25,22 @@ export const AuthContextProvider = ({
       password: password,
     });
 
-    if (error && !data) {
-      throw error;
-    } else {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-      if (!user) {
-        throw new Error("User not found");
-      }
-
-      await insertUser({
-        user_id: user.id,
-        password: password,
-        email: email,
-      });
-
-      console.log("User: ", data);
-      return data;
+    if (!user) {
+      throw new Error("User not found");
     }
+
+    await insertUser({
+      user_id: user.id,
+      password: password,
+      email: email,
+    });
+
+    console.log("User: ", data);
+    return data;
   }
 
   async function signIn(email: string, password: string) {

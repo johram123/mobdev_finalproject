@@ -11,11 +11,6 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import {
-  useFonts,
-  Unbounded_400Regular,
-  Unbounded_700Bold,
-} from "@expo-google-fonts/unbounded";
 import { AntDesign } from "@expo/vector-icons";
 import { getCategory } from "../../lib/category";
 import CategoryHandler from "../../components/categoryhandler";
@@ -29,14 +24,7 @@ interface Category {
 }
 
 export default function Home() {
-  const router = useRouter();
-  const { signOut } = useAuth();
   const { user } = useAuth();
-
-  const [fontsLoaded] = useFonts({
-    Unbounded_Regular: Unbounded_400Regular,
-    Unbounded_Bold: Unbounded_700Bold,
-  });
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -59,18 +47,8 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (fontsLoaded) {
-      fetchCategories();
-    }
-  }, [fontsLoaded]);
-
-  if (!fontsLoaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#0484D1" />
-      </View>
-    );
-  }
+    fetchCategories();
+  }, []);
 
   return (
     <View style={styles.container}>
