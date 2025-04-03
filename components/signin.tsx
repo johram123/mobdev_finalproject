@@ -11,8 +11,10 @@ import {
   Unbounded_400Regular,
   Unbounded_700Bold,
 } from "@expo-google-fonts/unbounded";
+import { useAuth } from "../lib/supabase_auth";
 
 import React, { useState } from "react";
+import { User } from "@supabase/supabase-js";
 
 type SigninProps = {
   booleanToggle: (isLoggedIn: boolean) => void;
@@ -30,15 +32,18 @@ const Signin: React.FC<SigninProps> = ({
     Unbounded_Bold: Unbounded_700Bold,
   });
 
+  const { signIn } = useAuth();
   const [username, setUserInput] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
-  const handleSubmit = () => {
+  const handleSignIn = async () => {
     if (username && password) {
-      setUsername(username);
+      console.log("Signing in");
+      await signIn(username, password);
       booleanToggle(true);
+      setUsername(username);
     } else {
-      alert("Please enter both username and password.");
+      alert("Please fill out all fields");
     }
   };
 
@@ -64,7 +69,7 @@ const Signin: React.FC<SigninProps> = ({
           />
         </View>
       </View>
-      <TouchableOpacity style={style.loginButton} onPress={handleSubmit}>
+      <TouchableOpacity style={style.loginButton} onPress={handleSignIn}>
         <Text style={style.loginButtonText}>Log in</Text>
       </TouchableOpacity>
       <View style={style.footer}>

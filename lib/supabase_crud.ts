@@ -1,6 +1,7 @@
 import supabase from "./supabase";
 
 const TABLE_NAME = "users";
+const CATEGORY_TABLE_NAME = "categories";
 
 export async function getItems() {
   const {
@@ -15,21 +16,23 @@ export async function getItems() {
   const { data, error } = await supabase
     .from(TABLE_NAME)
     .select("*")
-    .eq("userID", user.id);
+    .eq("user_id", user.id);
 }
 
 export async function insertUser(user: {
-  userID: string;
-  username: string;
+  user_id: string;
+  password: string;
   email: string;
 }) {
-  const { userID, username, email } = user;
+  const { user_id, password, email } = user;
   const { data, error } = await supabase
     .from(TABLE_NAME)
-    .insert([{ userID: userID, usernamename: username, email: email }]);
+    .insert([{ user_id: user_id, password: password, email: email }]);
   if (error) {
     throw error;
   }
+
+  console.log("User inserted: ", data);
 }
 
 export async function updateUser(user: {

@@ -1,17 +1,37 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useEffect } from "react";
+import { View, Text, StyleSheet, Button } from "react-native";
 import {
   useFonts,
   Unbounded_400Regular,
   Unbounded_700Bold,
 } from "@expo-google-fonts/unbounded";
 import { useState } from "react";
+import { useAuth } from "../../lib/supabase_auth";
+import { useRouter } from "expo-router";
 
 export default function Home() {
+  const router = useRouter();
+  const { signOut } = useAuth();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user) {
+      router.push("/");
+    }
+  }, [user]);
+
   let [fontsLoaded] = useFonts({
     Unbounded_Regular: Unbounded_400Regular,
     Unbounded_Bold: Unbounded_700Bold,
   });
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      alert("Error signing out");
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -26,6 +46,7 @@ export default function Home() {
             }}
           >
             Hello, User!
+            <Button title="Sign Out" onPress={handleSignOut} />
           </Text>
         </View>
         <View style={styles.content}>

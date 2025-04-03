@@ -1,7 +1,18 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Button } from "react-native";
-import { useFonts, Unbounded_400Regular,Unbounded_700Bold } from "@expo-google-fonts/unbounded";
-
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Button,
+} from "react-native";
+import {
+  useFonts,
+  Unbounded_400Regular,
+  Unbounded_700Bold,
+} from "@expo-google-fonts/unbounded";
+import { useAuth } from "../lib/supabase_auth";
 
 const CreateAccount: React.FC<{ navigateBack: any }> = ({ navigateBack }) => {
   let [fontsLoaded] = useFonts({
@@ -9,16 +20,23 @@ const CreateAccount: React.FC<{ navigateBack: any }> = ({ navigateBack }) => {
     Unbounded_Bold: Unbounded_700Bold,
   });
 
+  const { signUp } = useAuth();
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
-  const handleCreateAccount = () => {
+  const handleCreateAccount = async () => {
     if (firstName && lastName && email && password) {
-      alert("Account created successfully!");
+      try {
+        console.log("Creating account");
+        await signUp(email, password);
+        navigateBack();
+      } catch (error) {
+        alert("Error creating account blah");
+      }
     } else {
-      alert("Please fill out all fields.");
+      alert("Please fill out all fields");
     }
   };
 
@@ -60,8 +78,11 @@ const CreateAccount: React.FC<{ navigateBack: any }> = ({ navigateBack }) => {
           />
         </View>
       </View>
-      <TouchableOpacity style={styles.createButton} onPress={handleCreateAccount}>
-    <Text style={styles.createButtonText} >Create</Text>
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={handleCreateAccount}
+      >
+        <Text style={styles.createButtonText}>Create</Text>
       </TouchableOpacity>
     </View>
   );
@@ -80,7 +101,6 @@ const styles = StyleSheet.create({
   namefield: {
     width: 150,
     marginVertical: 10,
-    
   },
   credentialFields: {
     width: 300,
@@ -99,7 +119,6 @@ const styles = StyleSheet.create({
     borderColor: "#d3d3d3",
     borderWidth: 1,
     borderRadius: 15,
-    
   },
   inputCredentials: {
     width: 300,
