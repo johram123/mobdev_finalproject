@@ -17,7 +17,7 @@ export default function CategoryHandler({ isVisible, onClose, onCategoryAdded }:
 
   const handleSubmit = async () => {
     if (categoryName === "") {
-      Alert.alert("Error", "Category name cannot be empty.")
+      Alert.alert("Error", "Category name cannot be null")
       return
     }
 
@@ -29,7 +29,7 @@ export default function CategoryHandler({ isVisible, onClose, onCategoryAdded }:
       onClose()
     } catch (error) {
       console.error("Error creating category:", error)
-      Alert.alert("Error", "Failed to create category. Please try again.")
+      Alert.alert("Error", "Failed to create category, try again.")
     } finally {
       setIsLoading(false)
     }
