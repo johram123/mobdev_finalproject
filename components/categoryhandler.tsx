@@ -1,41 +1,63 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { View, Text, TextInput, Modal, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native"
-import { createCategory } from "../lib/category"
-import { useFonts, Unbounded_400Regular, Unbounded_700Bold } from "@expo-google-fonts/unbounded"
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Modal,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import { createCategory } from "../lib/category";
+import {
+  useFonts,
+  Unbounded_400Regular,
+  Unbounded_700Bold,
+} from "@expo-google-fonts/unbounded";
 
 interface CategoryHandlerProps {
-  isVisible: boolean
-  onClose: () => void
-  onCategoryAdded: () => void
+  isVisible: boolean;
+  onClose: () => void;
+  onCategoryAdded: () => void;
 }
 
-export default function CategoryHandler({ isVisible, onClose, onCategoryAdded }: CategoryHandlerProps) {
-  const [categoryName, setCategoryName] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+export default function CategoryHandler({
+  isVisible,
+  onClose,
+  onCategoryAdded,
+}: CategoryHandlerProps) {
+  const [categoryName, setCategoryName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async () => {
     if (categoryName === "") {
-      Alert.alert("Error", "Category name cannot be null")
-      return
+      Alert.alert("Error", "Category name cannot be empty.");
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      await createCategory({ category_Name: categoryName })
-      setCategoryName("")
-      onCategoryAdded()
-      onClose()
+      await createCategory({ category_Name: categoryName });
+      setCategoryName("");
+      onCategoryAdded();
+      onClose();
     } catch (error) {
-      console.error("Error creating category:", error)
-      Alert.alert("Error", "Failed to create category, try again.")
+      console.error("Error creating category:", error);
+      Alert.alert("Error", "Failed to create category. Please try again.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
   return (
-    <Modal visible={isVisible} transparent={true} animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={isVisible}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={onClose}
+    >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <Text style={styles.modalTitle}>Create New Category</Text>
@@ -49,11 +71,19 @@ export default function CategoryHandler({ isVisible, onClose, onCategoryAdded }:
           />
 
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onClose} disabled={isLoading}>
+            <TouchableOpacity
+              style={[styles.button, styles.cancelButton]}
+              onPress={onClose}
+              disabled={isLoading}
+            >
               <Text style={styles.buttonText}>Cancel</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.button, styles.createButton]} onPress={handleSubmit} disabled={isLoading}>
+            <TouchableOpacity
+              style={[styles.button, styles.createButton]}
+              onPress={handleSubmit}
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
@@ -64,7 +94,7 @@ export default function CategoryHandler({ isVisible, onClose, onCategoryAdded }:
         </View>
       </View>
     </Modal>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -130,21 +160,20 @@ const styles = StyleSheet.create({
   },
   category: {
     backgroundColor: "#0484D1",
-    width: "70%", 
-    minHeight: 100, 
+    width: "70%",
+    minHeight: 100,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 20,
     marginVertical: 10,
-    padding: 15, 
-    overflow: "hidden", 
+    padding: 15,
+    overflow: "hidden",
   },
   textStyle: {
     fontSize: 20,
     fontFamily: "Unbounded_Regular",
     color: "white",
-    textAlign: "center", 
-    overflow: "hidden", 
+    textAlign: "center",
+    overflow: "hidden",
   },
-})
-
+});

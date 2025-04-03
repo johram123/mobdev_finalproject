@@ -1,13 +1,25 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View } from "react-native";
+import { Button, StyleSheet, View, Text } from "react-native";
 import Signin from "../components/signin";
 import CreateAcc from "../components/createacc";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import { useAuth } from "../lib/supabase_auth";
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<string>("Signin");
   const [username, setUsername] = useState<string>("");
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const { user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user) {
+      router.push("/content/home");
+    }
+  }, [user]);
+
+  console.log("Current Screen: ", currentScreen);
 
   return (
     <View style={styles.container}>

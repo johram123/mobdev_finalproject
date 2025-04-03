@@ -1,62 +1,61 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native"
-import { useFonts, Unbounded_400Regular, Unbounded_700Bold } from "@expo-google-fonts/unbounded"
-import { AntDesign } from "@expo/vector-icons"
-import { getCategory} from "../lib/category" 
-import CategoryHandler from "../components/categoryhandler"
-import DeleteHandler from "../components/deletehandler"
+import { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
+import {
+  useFonts,
+  Unbounded_400Regular,
+  Unbounded_700Bold,
+} from "@expo-google-fonts/unbounded";
+import { AntDesign } from "@expo/vector-icons";
+import { getCategory } from "../../lib/category";
+import { useAuth } from "../../lib/supabase_auth";
+import { useRouter } from "expo-router";
+import CategoryHandler from "../../components/categoryhandler";
+import DeleteHandler from "../../components/deletehandler";
 
 interface Category {
-  category_id: number
-  category_Name: string
+  category_id: number;
+  category_Name: string;
 }
 
 export default function Home() {
-  const [fontsLoaded] = useFonts({
-    Unbounded_Regular: Unbounded_400Regular,
-    Unbounded_Bold: Unbounded_700Bold,
-  })
+  const { user } = useAuth();
 
-  const [categories, setCategories] = useState<Category[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [modalVisible, setModalVisible] = useState(false)
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const fetchCategories = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const data = await getCategory()
-      setCategories(data)
+      const data = await getCategory();
+      setCategories(data);
     } catch (error) {
-      console.error("Error fetching categories:", error)
+      console.error("Error fetching categories:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  
   const handleCategoryAdded = () => {
-    fetchCategories() 
-  }
+    fetchCategories();
+  };
 
   const handleCategoryPage = (categoryId: number) => {
-    console.log("Category pressed:", categoryId)
-  }
+    console.log("Category pressed:", categoryId);
+  };
 
   useEffect(() => {
-    if (fontsLoaded) {
-      fetchCategories()
-    }
-  }, [fontsLoaded])
-
-  if (!fontsLoaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#0484D1" />
-      </View>
-    )
-  }
+    fetchCategories();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -86,11 +85,20 @@ export default function Home() {
             </View>
 
             {isLoading ? (
-              <ActivityIndicator size="large" color="#0484D1" style={styles.loader} />
+              <ActivityIndicator
+                size="large"
+                color="#0484D1"
+                style={styles.loader}
+              />
             ) : (
-              <ScrollView contentContainerStyle={styles.categoriesScrollView} showsVerticalScrollIndicator={false}>
+              <ScrollView
+                contentContainerStyle={styles.categoriesScrollView}
+                showsVerticalScrollIndicator={false}
+              >
                 {categories.length === 0 ? (
-                  <Text style={styles.noCategories}>No categories</Text>
+                  <Text style={styles.noCategories}>
+                    No categories yet. Add one!
+                  </Text>
                 ) : (
                   <View style={styles.categoryGrid}>
                     {categories.map((category) => (
@@ -124,7 +132,7 @@ export default function Home() {
         onCategoryAdded={handleCategoryAdded}
       />
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -237,4 +245,4 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
   },
-})
+});
