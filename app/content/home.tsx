@@ -28,6 +28,7 @@ interface Category {
 
 export default function Home() {
   const { user } = useAuth();
+  const router = useRouter();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,8 +50,8 @@ export default function Home() {
     fetchCategories();
   };
 
-  const handleCategoryPage = (categoryId: number) => {
-    console.log("Category pressed:", categoryId);
+  const handleCategoryPage = (categoryId: number, categoryName: string) => {
+    router.push(`/content/flashcardpage?categoryId=${categoryId}&categoryName=${encodeURIComponent(categoryName)}`); // Pass categoryId and categoryName as query parameters
   };
 
   useEffect(() => {
@@ -105,7 +106,7 @@ export default function Home() {
                       <TouchableOpacity
                         key={category.category_id}
                         style={styles.categoryBox}
-                        onPress={() => handleCategoryPage(category.category_id)}
+                        onPress={() => handleCategoryPage(category.category_id, category.category_Name)}
                       >
                         <Text style={styles.categoryText}>
                           {category.category_Name}
