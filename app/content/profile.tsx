@@ -50,7 +50,10 @@ const Profile = () => {
             <Text style={styles.styledText}>{"Lastname"}</Text>
 
             {/* buttons */}
-            <TouchableOpacity style={[styles.textButton, { marginTop: 130 }]}>
+            <TouchableOpacity
+              style={[styles.textButton, { marginTop: 130 }]}
+              onPress={() => router.push("/content/editProfile")} // Navigate to EditProfile page
+            >
               <View style={styles.buttonContent}>
                 <Text style={styles.styledText}>Edit Profile</Text>
                 <Image source={require("../../assets/arrow.png")} style={styles.arrowIcon} />
@@ -62,18 +65,7 @@ const Profile = () => {
                 <Image source={require("../../assets/arrow.png")} style={styles.arrowIcon} />
               </View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.textButton}>
-              <View style={styles.buttonContent}>
-                <Text style={styles.styledText}>Contact</Text>
-                <Image source={require("../../assets/arrow.png")} style={styles.arrowIcon} />
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.textButton}>
-              <View style={styles.buttonContent}>
-                <Text style={styles.styledText}>Help Desk</Text>
-                <Image source={require("../../assets/arrow.png")} style={styles.arrowIcon} />
-              </View>
-            </TouchableOpacity>
+            
 
             <TouchableOpacity onPress={handleSignOut}>
               <Text style={[styles.logOutText, { marginTop: 80 }]}>Log Out</Text>
