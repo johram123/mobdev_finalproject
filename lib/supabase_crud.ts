@@ -60,3 +60,23 @@ export async function deleteUser(id: any) {
     throw error;
   }
 }
+
+export const updateStreak = async (
+  userId: string,
+  streaks: number,
+  lastSignedIn: string
+) => {
+  const { data, error } = await supabase
+    .from("users")
+    //upsert allpws you to insert and update a row
+    .upsert({
+      user_id: userId, 
+      signed_in: lastSignedIn,      
+      streaks: streaks, 
+    })
+    .eq("user_id", userId);
+    
+  if (error) {
+    console.error("Error updating streak ", error);
+  } 
+};

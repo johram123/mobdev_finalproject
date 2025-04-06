@@ -1,6 +1,6 @@
 import { useEffect, useState, createContext, useContext } from "react";
 import supabase from "./supabase";
-import { insertUser } from "./supabase_crud";
+import { insertUser, updateStreak } from "./supabase_crud"; 
 import { User } from "@supabase/supabase-js";
 
 type AuthContextType = {
@@ -57,6 +57,34 @@ export const AuthContextProvider = ({
     }
 
     console.log("User: ", data);
+
+    const user = data?.user;
+    if (user) {
+      const { data: lastSignInData, error: lastSignInError } = await supabase
+        .from("users")
+        .select("last_signed_in, streaks")
+        .eq("user_id", user.id)
+        .single();
+
+      if (lastSignInError) {
+        console.error("Error fetching user data", lastSignInError);
+      } else {
+        const last_signed_in = new Date(lastSignInData?.last_signed_in);
+        const currentDate = new Date();
+
+        let streakIncremented = false;
+        if (last_signed_in.toDateString() !== currentDate.toDateString()) {
+          const incrementStreak = lastSignInData.streaks + 1;
+          await updateStreak(user.id, incrementStreak, currentDate.toISOString());
+          streakIncremented = true;
+        }
+
+        if (!streakIncremented) {
+          await updateStreak(user.id, 1, currentDate.toISOString());
+        }
+      }
+    }
+
     return data;
   }
 
