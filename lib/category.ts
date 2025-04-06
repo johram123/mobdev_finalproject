@@ -45,7 +45,7 @@ export async function updateCategory(category: {
   }
 }
 
-export async function deleteCategory(category_id: number) {
+export async function deleteCategory(category_id: string) {
   const { data, error } = await supabase
     .from(TABLE_NAME)
     .delete()

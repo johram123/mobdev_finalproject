@@ -5,6 +5,9 @@ import {
   Button,
   TextInput,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from "react-native";
 import {
   useFonts,
@@ -14,7 +17,6 @@ import {
 import { useAuth } from "../lib/supabase_auth";
 
 import React, { useState } from "react";
-import { User } from "@supabase/supabase-js";
 
 type SigninProps = {
   booleanToggle: (isLoggedIn: boolean) => void;
@@ -50,25 +52,39 @@ const Signin: React.FC<SigninProps> = ({
   return (
     <View style={style.container}>
       <Text style={style.title}>Skim</Text>
-      <View style={style.inputContainer}>
-        <View style={style.inputGroup}>
-          <Text style={style.heading}>Email</Text>
-          <TextInput
-            style={style.input}
-            value={username}
-            onChangeText={setUserInput}
-          />
-        </View>
-        <View style={style.inputGroup}>
-          <Text style={style.heading}>Password</Text>
-          <TextInput
-            style={style.input}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-        </View>
-      </View>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
+      >
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+          }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View>
+            <View style={style.inputGroup}>
+              <Text style={style.heading}>Email</Text>
+              <TextInput
+                style={style.input}
+                value={username}
+                onChangeText={setUserInput}
+              />
+            </View>
+            <View style={style.inputGroup}>
+              <Text style={style.heading}>Password</Text>
+              <TextInput
+                style={style.input}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
       <TouchableOpacity style={style.loginButton} onPress={handleSignIn}>
         <Text style={style.loginButtonText}>Log in</Text>
       </TouchableOpacity>
@@ -88,9 +104,6 @@ const style = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     paddingTop: 100,
-  },
-  inputContainer: {
-    marginTop: 170,
   },
   inputGroup: {
     width: 300,

@@ -1,63 +1,78 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import React from "react";
 import {
   View,
   Text,
-  StyleSheet,
-  TouchableOpacity,
+  Button,
   ScrollView,
   ActivityIndicator,
+  TouchableOpacity,
+  StyleSheet,
 } from "react-native";
+import { useSearchParams } from "expo-router/build/hooks";
 import { AntDesign } from "@expo/vector-icons";
-import { getCategory } from "../../lib/category";
-import { useAuth } from "../../lib/supabase_auth";
-import { useRouter } from "expo-router";
-import CategoryHandler from "../../components/categoryhandler";
+import { useState, useEffect, useCallback } from "react";
+import { getSet } from "../../lib/set";
 import DeleteHandler from "../../components/deletehandler";
+import { useAuth } from "../../lib/supabase_auth";
+import TopicHandler from "../../components/topichandler";
+import { useFocusEffect } from "@react-navigation/native";
 
-interface Category {
-  category_id: string;
-  category_Name: string;
+interface Set {
+  question: string;
+  answer: string;
 }
 
-export default function Home() {
-  const { user } = useAuth();
-  const router = useRouter();
-
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export default function TopicPage() {
+  const searchParams = useSearchParams();
   const [modalVisible, setModalVisible] = useState(false);
 
-  const fetchCategories = async () => {
+  const [categoryId, setCategoryId] = useState<string>("");
+  const [categoryName, setCategoryName] = useState<string>("");
+  const [topicId, setTopicId] = useState<string>("");
+  const [topicName, setTopicName] = useState<string>("");
+
+  const { user } = useAuth();
+
+  const [fcSet, setFcSet] = useState<Set[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchSet = async (topicId: string) => {
     setIsLoading(true);
     try {
-      const data = await getCategory();
-      setCategories(data);
+      if (!topicId) {
+        console.error("No category ID provided");
+        return;
+      }
+      const set = await getSet(categoryId || "");
+      setSet(set);
     } catch (error) {
-      console.error("Error fetching categories:", error);
+      console.error("Error fetching set:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCategoryAdded = () => {
-    fetchCategories();
+  const handleTopicAdded = () => {
+    fetchSet(topicId);
   };
 
-  const handleCategoryPage = (categoryId: string, categoryName: string) => {
-    console.log("Category ID:", categoryId);
-    console.log("Category Name:", categoryName);
-    router.push(
-      `/content/topicpage?categoryId=${categoryId}&categoryName=${encodeURIComponent(
-        categoryName
-      )}`
-    ); // Pass categoryId and categoryName as query parameters
-  };
+  useFocusEffect(
+    useCallback(() => {
+      const catId = searchParams.get("categoryId") || "";
+      const catName = searchParams.get("categoryName") || "";
+      const topId = searchParams.get("topicId") || "";
+      const topName = searchParams.get("topicName") || "";
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+      // Only update state and refetch if values changed
+      if (topId !== topicId || topName !== topicName) {
+        setCategoryId(catId);
+        setCategoryName(catName);
+        setTopicId(topId);
+        setTopicName(topName);
+        fetchSet(topId);
+      }
+    }, [searchParams, categoryId, topicId])
+  );
 
   return (
     <View style={styles.container}>
@@ -75,9 +90,9 @@ export default function Home() {
           </Text>
         </View>
         <View style={styles.content}>
-          <View style={styles.categoryContainer}>
-            <View style={styles.categoryHeader}>
-              <Text style={styles.categoryTitle}>My Categories</Text>
+          <View style={styles.setContainer}>
+            <View style={styles.setHeader}>
+              <Text style={styles.setTitle}>{topicName}</Text>
               <TouchableOpacity
                 style={styles.addButton}
                 onPress={() => setModalVisible(true)}
@@ -97,47 +112,31 @@ export default function Home() {
                 contentContainerStyle={styles.categoriesScrollView}
                 showsVerticalScrollIndicator={false}
               >
-                {categories.length === 0 ? (
-                  <Text style={styles.noCategories}>
-                    No categories yet. Add one!
-                  </Text>
-                ) : (
-                  <View style={styles.categoryGrid}>
-                    {categories.map((category) => (
-                      <TouchableOpacity
-                        key={category.category_id}
-                        style={styles.categoryBox}
-                        onPress={() =>
-                          handleCategoryPage(
-                            category.category_id,
-                            category.category_Name
-                          )
-                        }
-                      >
-                        <Text style={styles.categoryText}>
-                          {category.category_Name}
-                        </Text>
-                        <View style={styles.deleteButtonContainer}>
-                          <DeleteHandler
-                            rowId={category.category_id}
-                            onDeleteSuccess={fetchCategories}
-                            page="category"
-                          />
-                        </View>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
+                <View style={styles.setGrid}>
+                  {topics.map((topic) => (
+                    <View key={topic.topic_id} style={styles.topicBox}>
+                      <Text style={styles.topicText}>{topic.topic_name}</Text>
+                      <View style={styles.deleteButtonContainer}>
+                        <DeleteHandler
+                          rowId={topic.topic_id}
+                          onDeleteSuccess={() => void fetchSet(topicId)}
+                          page="topic"
+                        />
+                      </View>
+                    </View>
+                  ))}
+                </View>
               </ScrollView>
             )}
           </View>
         </View>
       </View>
 
-      <CategoryHandler
+      <TopicHandler
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}
-        onCategoryAdded={handleCategoryAdded}
+        onCategoryAdded={handleTopicAdded}
+        categoryId={categoryId || ""}
       />
     </View>
   );
@@ -156,7 +155,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     backgroundColor: "white",
   },
-  categoryContainer: {
+  setContainer: {
     width: "100%",
     height: "90%",
     flexDirection: "column",
@@ -165,7 +164,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 30,
   },
-  categoryHeader: {
+  setHeader: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -174,7 +173,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     position: "relative",
   },
-  categoryTitle: {
+  setTitle: {
     fontSize: 20,
     fontFamily: "Unbounded_Regular",
     color: "#0484D1",
@@ -203,13 +202,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     width: "100%",
   },
-  categoryGrid: {
+  setGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "flex-start",
     width: "100%",
   },
-  categoryBox: {
+  setBox: {
     width: "40%",
     height: 120,
     backgroundColor: "#0484D1",
@@ -220,7 +219,7 @@ const styles = StyleSheet.create({
     padding: 10,
     position: "relative",
   },
-  categoryText: {
+  setText: {
     fontSize: 16,
     fontFamily: "Unbounded_Regular",
     color: "white",
@@ -240,7 +239,7 @@ const styles = StyleSheet.create({
   loader: {
     marginTop: 50,
   },
-  noCategories: {
+  noSets: {
     fontFamily: "Unbounded_Regular",
     fontSize: 16,
     color: "#666",

@@ -9,10 +9,9 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: "#0484D1",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "10 %",
+          height: 50,
           borderTopWidth: 0,
+
           elevation: 0,
         },
       }}
@@ -21,14 +20,39 @@ export default function TabsLayout() {
         name="home"
         options={{
           tabBarLabel: "",
-          tabBarIcon: () => <Image source={require("../../assets/home.png")} />,
+          tabBarIcon: () => (
+            <Image
+              source={require("../../assets/home.png")}
+              style={{
+                width: 50,
+                height: 80,
+                alignSelf: "center",
+              }}
+              resizeMode="contain"
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           tabBarLabel: "",
-          tabBarIcon: () => <Image source={require("../../assets/user.png")} />,
+          tabBarIcon: () => (
+            <Image
+              source={require("../../assets/user.png")}
+              style={{
+                width: 30,
+                height: 30,
+                alignSelf: "center",
+              }}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="topicpage"
+        options={{
+          href: null, // 💡 makes this page accessible via navigation but not in tabs
         }}
       />
     </Tabs>

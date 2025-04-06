@@ -1,63 +1,96 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import React from "react";
 import {
   View,
   Text,
-  StyleSheet,
-  TouchableOpacity,
+  Button,
   ScrollView,
   ActivityIndicator,
+  TouchableOpacity,
+  StyleSheet,
 } from "react-native";
+import { useSearchParams } from "expo-router/build/hooks";
 import { AntDesign } from "@expo/vector-icons";
-import { getCategory } from "../../lib/category";
-import { useAuth } from "../../lib/supabase_auth";
 import { useRouter } from "expo-router";
+import { useState, useEffect, useCallback } from "react";
+import { getTopics } from "../../lib/topics";
 import CategoryHandler from "../../components/categoryhandler";
 import DeleteHandler from "../../components/deletehandler";
+import { useAuth } from "../../lib/supabase_auth";
+import TopicHandler from "../../components/topichandler";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
-interface Category {
-  category_id: string;
-  category_Name: string;
+interface Topic {
+  topic_id: string;
+  topic_name: string;
 }
 
-export default function Home() {
-  const { user } = useAuth();
+export default function TopicPage() {
+  const searchParams = useSearchParams();
+  const [modalVisible, setModalVisible] = useState(false);
+  const navigation = useNavigation();
+
   const router = useRouter();
 
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [categoryId, setCategoryId] = useState<string>("");
+  const [categoryName, setCategoryName] = useState<string>("");
+  // console.log("Category ID:", categoryId);
+  // console.log("Category Name:", categoryName);
 
-  const fetchCategories = async () => {
+  const { user } = useAuth();
+
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchTopics = async (categoryId: string, categoryName: string) => {
     setIsLoading(true);
     try {
-      const data = await getCategory();
-      setCategories(data);
+      if (!categoryId) {
+        console.error("No category ID provided");
+        return;
+      }
+      console.log("Fetching topics for category ID:", categoryId);
+      console.log("Fetching Category Name:", categoryName);
+      const topics = await getTopics(categoryId || "");
+      setTopics(topics);
     } catch (error) {
-      console.error("Error fetching categories:", error);
+      console.error("Error fetching topics:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCategoryAdded = () => {
-    fetchCategories();
+  const handleTopicAdded = () => {
+    fetchTopics(categoryId, categoryName);
   };
 
-  const handleCategoryPage = (categoryId: string, categoryName: string) => {
+  const handleAddSet = (
+    categoryId: string,
+    categoryName: string,
+    topicId: string,
+    topicName: string
+  ) => {
     console.log("Category ID:", categoryId);
     console.log("Category Name:", categoryName);
     router.push(
-      `/content/topicpage?categoryId=${categoryId}&categoryName=${encodeURIComponent(
+      `/content/addset?categoryId=${categoryId}&categoryName=${encodeURIComponent(
         categoryName
-      )}`
-    ); // Pass categoryId and categoryName as query parameters
+      )}&topicId=${topicId}&topicName=${encodeURIComponent(topicName)}`
+    );
   };
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const catId = searchParams.get("categoryId") || "";
+      const catName = searchParams.get("categoryName") || "";
+
+      // Only update state and refetch if values changed
+      if (catId !== categoryId || catName !== categoryName) {
+        setCategoryId(catId);
+        setCategoryName(catName);
+        fetchTopics(catId, catName);
+      }
+    }, [searchParams, categoryId, categoryName])
+  );
 
   return (
     <View style={styles.container}>
@@ -75,9 +108,9 @@ export default function Home() {
           </Text>
         </View>
         <View style={styles.content}>
-          <View style={styles.categoryContainer}>
-            <View style={styles.categoryHeader}>
-              <Text style={styles.categoryTitle}>My Categories</Text>
+          <View style={styles.topicContainer}>
+            <View style={styles.topicHeader}>
+              <Text style={styles.topicTitle}>{categoryName}</Text>
               <TouchableOpacity
                 style={styles.addButton}
                 onPress={() => setModalVisible(true)}
@@ -97,34 +130,23 @@ export default function Home() {
                 contentContainerStyle={styles.categoriesScrollView}
                 showsVerticalScrollIndicator={false}
               >
-                {categories.length === 0 ? (
-                  <Text style={styles.noCategories}>
-                    No categories yet. Add one!
-                  </Text>
+                {topics.length === 0 ? (
+                  <Text style={styles.noTopics}>No topics yet. Add one!</Text>
                 ) : (
-                  <View style={styles.categoryGrid}>
-                    {categories.map((category) => (
-                      <TouchableOpacity
-                        key={category.category_id}
-                        style={styles.categoryBox}
-                        onPress={() =>
-                          handleCategoryPage(
-                            category.category_id,
-                            category.category_Name
-                          )
-                        }
-                      >
-                        <Text style={styles.categoryText}>
-                          {category.category_Name}
-                        </Text>
+                  <View style={styles.topicGrid}>
+                    {topics.map((topic) => (
+                      <View key={topic.topic_id} style={styles.topicBox}>
+                        <Text style={styles.topicText}>{topic.topic_name}</Text>
                         <View style={styles.deleteButtonContainer}>
                           <DeleteHandler
-                            rowId={category.category_id}
-                            onDeleteSuccess={fetchCategories}
-                            page="category"
+                            rowId={topic.topic_id}
+                            onDeleteSuccess={() =>
+                              void fetchTopics(categoryId, categoryName)
+                            }
+                            page="topic"
                           />
                         </View>
-                      </TouchableOpacity>
+                      </View>
                     ))}
                   </View>
                 )}
@@ -134,10 +156,11 @@ export default function Home() {
         </View>
       </View>
 
-      <CategoryHandler
+      <TopicHandler
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}
-        onCategoryAdded={handleCategoryAdded}
+        onCategoryAdded={handleTopicAdded}
+        categoryId={categoryId || ""}
       />
     </View>
   );
@@ -156,7 +179,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     backgroundColor: "white",
   },
-  categoryContainer: {
+  topicContainer: {
     width: "100%",
     height: "90%",
     flexDirection: "column",
@@ -165,7 +188,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 30,
   },
-  categoryHeader: {
+  topicHeader: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -174,7 +197,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     position: "relative",
   },
-  categoryTitle: {
+  topicTitle: {
     fontSize: 20,
     fontFamily: "Unbounded_Regular",
     color: "#0484D1",
@@ -203,13 +226,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     width: "100%",
   },
-  categoryGrid: {
+  topicGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "flex-start",
     width: "100%",
   },
-  categoryBox: {
+  topicBox: {
     width: "40%",
     height: 120,
     backgroundColor: "#0484D1",
@@ -220,7 +243,7 @@ const styles = StyleSheet.create({
     padding: 10,
     position: "relative",
   },
-  categoryText: {
+  topicText: {
     fontSize: 16,
     fontFamily: "Unbounded_Regular",
     color: "white",
@@ -240,7 +263,7 @@ const styles = StyleSheet.create({
   loader: {
     marginTop: 50,
   },
-  noCategories: {
+  noTopics: {
     fontFamily: "Unbounded_Regular",
     fontSize: 16,
     color: "#666",
