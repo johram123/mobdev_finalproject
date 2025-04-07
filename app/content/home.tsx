@@ -52,7 +52,7 @@ export default function Home() {
       `/content/topicpage?categoryId=${categoryId}&categoryName=${encodeURIComponent(
         categoryName
       )}`
-    ); // Pass categoryId and categoryName as query parameters
+    ); 
   };
 
   useEffect(() => {

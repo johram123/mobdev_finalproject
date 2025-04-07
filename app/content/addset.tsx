@@ -7,17 +7,21 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   StyleSheet,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useSearchParams } from "expo-router/build/hooks";
 import { AntDesign } from "@expo/vector-icons";
 import { useState, useEffect, useCallback } from "react";
-import { getSet } from "../../lib/set";
+import { getSet, createSet } from "../../lib/set";
 import DeleteHandler from "../../components/deletehandler";
 import { useAuth } from "../../lib/supabase_auth";
 import TopicHandler from "../../components/topichandler";
 import { useFocusEffect } from "@react-navigation/native";
 
 interface Set {
+  fc_id: string;
   question: string;
   answer: string;
 }
@@ -33,7 +37,9 @@ export default function TopicPage() {
 
   const { user } = useAuth();
 
-  const [fcSet, setFcSet] = useState<Set[]>([]);
+  const [fcSet, setFcSet] = useState<Set[]>([
+    { fc_id: "", question: "", answer: "" },
+  ]);
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchSet = async (topicId: string) => {
@@ -44,7 +50,7 @@ export default function TopicPage() {
         return;
       }
       const set = await getSet(categoryId || "");
-      setSet(set);
+      setFcSet(set);
     } catch (error) {
       console.error("Error fetching set:", error);
     } finally {
@@ -52,8 +58,40 @@ export default function TopicPage() {
     }
   };
 
-  const handleTopicAdded = () => {
-    fetchSet(topicId);
+  const handleSetInputAdded = () => {
+    setFcSet([...fcSet, { fc_id: "", question: "", answer: "" }]);
+  };
+
+  const handleQuestionChange = (index: number, question: string) => {
+    const updatedSet = [...fcSet];
+    updatedSet[index].question = question;
+    setFcSet(updatedSet);
+  };
+
+  const handleAnswerChange = (index: number, answer: string) => {
+    const updatedSet = [...fcSet];
+    updatedSet[index].answer = answer;
+    setFcSet(updatedSet);
+  };
+
+  const setAddHandler = async () => {
+    setIsLoading(true);
+    try {
+      for (const fc of fcSet) {
+        if (fc.question && fc.answer) {
+          await createSet({
+            topic_id: topicId,
+            category_id: categoryId,
+            questions: fc.question,
+            answers: fc.answer,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error creating set:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useFocusEffect(
@@ -95,7 +133,7 @@ export default function TopicPage() {
               <Text style={styles.setTitle}>{topicName}</Text>
               <TouchableOpacity
                 style={styles.addButton}
-                onPress={() => setModalVisible(true)}
+                onPress={handleSetInputAdded}
               >
                 <AntDesign name="plus" size={24} color="#0484D1" />
               </TouchableOpacity>
@@ -108,36 +146,54 @@ export default function TopicPage() {
                 style={styles.loader}
               />
             ) : (
-              <ScrollView
-                contentContainerStyle={styles.categoriesScrollView}
-                showsVerticalScrollIndicator={false}
+              <KeyboardAvoidingView
+                style={{
+                  width: "100%",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
               >
-                <View style={styles.setGrid}>
-                  {topics.map((topic) => (
-                    <View key={topic.topic_id} style={styles.topicBox}>
-                      <Text style={styles.topicText}>{topic.topic_name}</Text>
-                      <View style={styles.deleteButtonContainer}>
-                        <DeleteHandler
-                          rowId={topic.topic_id}
-                          onDeleteSuccess={() => void fetchSet(topicId)}
-                          page="topic"
-                        />
+                <ScrollView
+                  contentContainerStyle={styles.setScrollView}
+                  showsVerticalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled"
+                >
+                  <View style={styles.setGrid}>
+                    {fcSet.map((fc, index) => (
+                      <View key={index} style={styles.setBox}>
+                        <View style={styles.setTextBox}>
+                          <TextInput
+                            style={styles.setText}
+                            placeholder="Question"
+                            value={fc.question}
+                            onChangeText={(text) =>
+                              handleQuestionChange(index, text)
+                            }
+                          />
+                        </View>
+
+                        <View style={styles.setTextBox}>
+                          <TextInput
+                            style={styles.setText}
+                            placeholder="Answer"
+                            value={fc.answer}
+                            onChangeText={(text) =>
+                              handleAnswerChange(index, text)
+                            }
+                          />
+                        </View>
                       </View>
-                    </View>
-                  ))}
-                </View>
-              </ScrollView>
+                    ))}
+                  </View>
+                </ScrollView>
+              </KeyboardAvoidingView>
             )}
           </View>
         </View>
       </View>
-
-      <TopicHandler
-        isVisible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        onCategoryAdded={handleTopicAdded}
-        categoryId={categoryId || ""}
-      />
     </View>
   );
 }
@@ -197,7 +253,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     zIndex: 1,
   },
-  categoriesScrollView: {
+  setScrollView: {
     alignItems: "center",
     paddingVertical: 10,
     width: "100%",
@@ -205,24 +261,29 @@ const styles = StyleSheet.create({
   setGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "flex-start",
-    width: "100%",
+    justifyContent: "center",
   },
   setBox: {
-    width: "40%",
+    width: "90%",
     height: 120,
     backgroundColor: "#0484D1",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "flex-start",
     borderRadius: 20,
     margin: 10,
     padding: 10,
     position: "relative",
   },
+  setTextBox: {
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    width: "100%",
+    borderBottomWidth: 3,
+    borderColor: "white",
+  },
   setText: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "Unbounded_Regular",
-    color: "white",
     textAlign: "center",
     overflow: "hidden",
   },

@@ -69,8 +69,6 @@ export default function TopicPage() {
     topicId: string,
     topicName: string
   ) => {
-    console.log("Category ID:", categoryId);
-    console.log("Category Name:", categoryName);
     router.push(
       `/content/addset?categoryId=${categoryId}&categoryName=${encodeURIComponent(
         categoryName
@@ -135,7 +133,18 @@ export default function TopicPage() {
                 ) : (
                   <View style={styles.topicGrid}>
                     {topics.map((topic) => (
-                      <View key={topic.topic_id} style={styles.topicBox}>
+                      <TouchableOpacity
+                        key={topic.topic_id}
+                        style={styles.topicBox}
+                        onPress={() =>
+                          handleAddSet(
+                            categoryId,
+                            categoryName,
+                            topic.topic_id,
+                            topic.topic_name
+                          )
+                        }
+                      >
                         <Text style={styles.topicText}>{topic.topic_name}</Text>
                         <View style={styles.deleteButtonContainer}>
                           <DeleteHandler
@@ -146,7 +155,7 @@ export default function TopicPage() {
                             page="topic"
                           />
                         </View>
-                      </View>
+                      </TouchableOpacity>
                     ))}
                   </View>
                 )}

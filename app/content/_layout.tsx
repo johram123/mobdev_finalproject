@@ -55,6 +55,13 @@ export default function TabsLayout() {
           href: null, // 💡 makes this page accessible via navigation but not in tabs
         }}
       />
+
+      <Tabs.Screen
+        name="addset"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
