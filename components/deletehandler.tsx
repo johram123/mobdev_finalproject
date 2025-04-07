@@ -3,6 +3,7 @@ import { Alert, ActivityIndicator, TouchableOpacity } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { deleteCategory } from "../lib/category";
 import { deleteTopic } from "../lib/topics";
+import { deleteSet } from "../lib/set";
 
 interface DeleteHandlerProps {
   rowId: string;
@@ -31,6 +32,8 @@ export default function DeleteHandler({
               await deleteCategory(rowId);
             } else if (page === "topic") {
               await deleteTopic(rowId);
+            } else if (page === "set") {
+              await deleteSet(rowId);
             } else {
               console.log("Unknown page type:", page);
             }

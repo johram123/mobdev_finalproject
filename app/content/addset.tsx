@@ -37,19 +37,23 @@ export default function TopicPage() {
 
   const { user } = useAuth();
 
-  const [fcSet, setFcSet] = useState<Set[]>([
-    { fc_id: "", question: "", answer: "" },
-  ]);
+  const [fcSet, setFcSet] = useState<Set[]>([]);
+
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchSet = async (topicId: string) => {
     setIsLoading(true);
     try {
       if (!topicId) {
-        console.error("No category ID provided");
+        console.error("No topic ID provided");
         return;
       }
-      const set = await getSet(categoryId || "");
+      const set = await getSet(topicId || "");
+      if (!set || set.length === 0) {
+        console.log("Fetched set:", set);
+        setFcSet([{ fc_id: "", question: "", answer: "" }]);
+        return;
+      }
       setFcSet(set);
     } catch (error) {
       console.error("Error fetching set:", error);
@@ -63,12 +67,14 @@ export default function TopicPage() {
   };
 
   const handleQuestionChange = (index: number, question: string) => {
+    console.log("Question changed:", question);
     const updatedSet = [...fcSet];
     updatedSet[index].question = question;
     setFcSet(updatedSet);
   };
 
   const handleAnswerChange = (index: number, answer: string) => {
+    console.log("Answer changed:", answer);
     const updatedSet = [...fcSet];
     updatedSet[index].answer = answer;
     setFcSet(updatedSet);
@@ -87,8 +93,20 @@ export default function TopicPage() {
           });
         }
       }
+      fetchSet(topicId);
     } catch (error) {
       console.error("Error creating set:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSetDelete = async (fcId: string) => {
+    setIsLoading(true);
+    try {
+      fetchSet(topicId);
+    } catch (error) {
+      console.error("Error deleting set:", error);
     } finally {
       setIsLoading(false);
     }
@@ -101,7 +119,8 @@ export default function TopicPage() {
       const topId = searchParams.get("topicId") || "";
       const topName = searchParams.get("topicName") || "";
 
-      // Only update state and refetch if values changed
+      if (!topId || !topName) return;
+
       if (topId !== topicId || topName !== topicName) {
         setCategoryId(catId);
         setCategoryName(catName);
@@ -185,12 +204,29 @@ export default function TopicPage() {
                             }
                           />
                         </View>
+                        {fc.fc_id && (
+                          <View style={styles.deleteButtonContainer}>
+                            <DeleteHandler
+                              rowId={fc.fc_id}
+                              onDeleteSuccess={() => void fetchSet(topicId)}
+                              page="set"
+                            />
+                          </View>
+                        )}
                       </View>
                     ))}
                   </View>
                 </ScrollView>
               </KeyboardAvoidingView>
             )}
+
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={setAddHandler}
+              disabled={isLoading}
+            >
+              <AntDesign name="check" size={24} color="#0484D1" />
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -248,6 +284,17 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
+  saveButton: {
+    backgroundColor: "#f0f0f0",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
   content: {
     flex: 5,
     alignItems: "center",
@@ -265,7 +312,7 @@ const styles = StyleSheet.create({
   },
   setBox: {
     width: "90%",
-    height: 120,
+    height: 200,
     backgroundColor: "#0484D1",
     justifyContent: "center",
     alignItems: "flex-start",

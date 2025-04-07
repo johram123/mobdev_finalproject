@@ -3,6 +3,7 @@ import supabase from "./supabase";
 const TABLE_NAME = "flashcardset";
 
 export async function getSet(topic_id: string) {
+  console.log("Fetching set for topic ID:", topic_id);
   const { data, error } = await supabase
     .from(TABLE_NAME)
     .select("*")
@@ -22,10 +23,10 @@ export async function createSet(topic: {
   const { topic_id, category_id, questions, answers } = topic;
   const { data, error } = await supabase.from(TABLE_NAME).insert([
     {
-      topic_name: topic_id,
+      topic_id: topic_id,
       category_id: category_id,
-      questions: questions,
-      answers: answers,
+      question: questions,
+      answer: answers,
     },
   ]);
   if (error) {
@@ -48,7 +49,7 @@ export async function updateSet(set: {
   }
 }
 
-export async function deleteTopic(fc_id: string) {
+export async function deleteSet(fc_id: string) {
   const { data, error } = await supabase
     .from(TABLE_NAME)
     .delete()
