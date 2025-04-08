@@ -8,6 +8,7 @@ type AuthContextType = {
   signUp: (email: string, password: string) => Promise<any>;
   signIn: (email: string, password: string) => Promise<any>;
   signOut: () => Promise<void>;
+  updateUser: (updates: { email: string }) => Promise<void>; // Ensure this matches the updateUser function
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -71,6 +72,34 @@ export const AuthContextProvider = ({
     console.log("User signed out successfully");
   }
 
+  // Add updateUser function
+  async function updateUser(updates: { email: string }) {
+    if (!user) {
+      throw new Error("No user is signed in");
+    }
+
+    const { error } = await supabase
+      .from("users") // Use the "users" table
+      .update(updates) // Update the "email" column
+      .eq("id", user.id); // Match the user's ID
+
+    if (error) {
+      console.error("Error updating user:", error.message);
+      throw error;
+    }
+
+    console.log("User updated successfully");
+  }
+
+  async function refreshUser() {
+    const { data, error } = await supabase.auth.getUser();
+    if (error) {
+      console.error("Error refreshing user:", error.message);
+      throw error;
+    }
+    setUser(data.user);
+  }
+
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -82,7 +111,7 @@ export const AuthContextProvider = ({
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, signUp, signIn, signOut, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

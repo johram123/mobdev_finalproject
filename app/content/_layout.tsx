@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Image, View } from "react-native";
+import { Image } from "react-native";
 
 export default function TabsLayout() {
   return (
@@ -9,7 +9,9 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: "#0484D1",
-          height: 50,
+          justifyContent: "center",
+          alignItems: "center",
+          height: "10%",
           borderTopWidth: 0,
 
           elevation: 0,
@@ -58,6 +60,12 @@ export default function TabsLayout() {
 
       <Tabs.Screen
         name="addset"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="editProfile"
         options={{
           href: null,
         }}
