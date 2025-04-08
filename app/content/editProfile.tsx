@@ -1,21 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { StyleSheet, View, Text, TextInput, TouchableOpacity } from "react-native";
 import { useAuth } from "../../lib/supabase_auth";
 import { useRouter } from "expo-router";
 
 const EditProfile = () => {
-  const { user, updateUser } = useAuth(); // Assuming `updateUser` is available in your `useAuth` hook
+  const { user, updateUser, refreshUser } = useAuth();
   const router = useRouter();
-  const [username, setUsername] = useState(user?.email?.split("@")[0] || "");
+  const [username, setUsername] = useState("");
+
+  
+  useEffect(() => {
+    if (user?.email) {
+      const emailPrefix = user.email.split("@")[0]; 
+      setUsername(emailPrefix);
+    }
+  }, [user]);
 
   const handleUpdate = async () => {
     try {
-      await updateUser({ email: username }); // Pass the new email value
-      alert("Email updated successfully!");
+      
+      if (!/^[a-zA-Z0-9]+$/.test(username)) {
+        alert("Username can only contain alphanumeric characters.");
+        return;
+      }
+
+   
+      const fullEmail = `${username}@gmail.com`;
+
+     
+      if (fullEmail === user?.email) {
+        alert("The new username is the same as the current username.");
+        return;
+      }
+
+      await updateUser({ email: fullEmail });
+      await refreshUser(); 
+      alert("Username updated successfully!");
       router.push("/content/profile");
     } catch (error) {
-      console.error("Error updating email:", error);
-      alert("Failed to update email.");
+      console.error("Error updating username:", error);
     }
   };
 
@@ -23,7 +46,7 @@ const EditProfile = () => {
     <View style={styles.container}>
       <View style={{ flex: 1, backgroundColor: "#0484D1" }}>
         <View style={styles.content}>
-          <Text style={[styles.styledText, { marginTop: 30 }]}>Edit Profile</Text>
+          <Text style={[styles.styledText, { marginTop: 30 }]}>Edit Username</Text>
           <TextInput
             style={styles.input}
             value={username}
@@ -32,7 +55,7 @@ const EditProfile = () => {
             placeholderTextColor="#d3d3d3"
           />
           <TouchableOpacity style={styles.saveButton} onPress={handleUpdate}>
-            <Text style={styles.saveButtonText}>Save Changes</Text>
+            <Text style={styles.saveButtonText}>Change Username</Text>
           </TouchableOpacity>
         </View>
       </View>

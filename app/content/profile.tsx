@@ -59,7 +59,10 @@ const Profile = () => {
                 <Image source={require("../../assets/arrow.png")} style={styles.arrowIcon} />
               </View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.textButton}>
+            <TouchableOpacity
+              style={styles.textButton}
+              onPress={() => router.push("/content/Settings")} // Navigate to Settings page
+            >
               <View style={styles.buttonContent}>
                 <Text style={styles.styledText}>Settings</Text>
                 <Image source={require("../../assets/arrow.png")} style={styles.arrowIcon} />

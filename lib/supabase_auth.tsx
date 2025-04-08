@@ -8,7 +8,8 @@ type AuthContextType = {
   signUp: (email: string, password: string) => Promise<any>;
   signIn: (email: string, password: string) => Promise<any>;
   signOut: () => Promise<void>;
-  updateUser: (updates: { email: string }) => Promise<void>; // Ensure this matches the updateUser function
+  updateUser: (updates: { email: string }) => Promise<void>;
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -72,23 +73,36 @@ export const AuthContextProvider = ({
     console.log("User signed out successfully");
   }
 
-  // Add updateUser function
   async function updateUser(updates: { email: string }) {
     if (!user) {
       throw new Error("No user is signed in");
     }
 
-    const { error } = await supabase
-      .from("users") // Use the "users" table
-      .update(updates) // Update the "email" column
-      .eq("id", user.id); // Match the user's ID
+    // 1. Update the email in the `auth.users` table
+    const { error: authError } = await supabase.auth.updateUser({
+      email: updates.email,
+    });
 
-    if (error) {
-      console.error("Error updating user:", error.message);
-      throw error;
+    if (authError) {
+      if (authError.message.includes("already registered")) {
+        throw new Error("This email is already in use.");
+      }
+      console.error("Error updating email in auth.users:", authError.message);
+      throw authError;
     }
 
-    console.log("User updated successfully");
+    // 2. Update the email in your custom `users` table
+    const { error: dbError } = await supabase
+      .from("users")
+      .update({ email: updates.email }) // Store the full email in the `users` table
+      .eq("user_id", user.id); // Ensure you're using the correct column name
+
+    if (dbError) {
+      console.error("Error updating email in users table:", dbError.message);
+      throw dbError;
+    }
+
+    console.log("Email updated successfully in both auth.users and users table");
   }
 
   async function refreshUser() {
@@ -111,7 +125,7 @@ export const AuthContextProvider = ({
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, signUp, signIn, signOut, updateUser }}>
+    <AuthContext.Provider value={{ user, signUp, signIn, signOut, updateUser, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
