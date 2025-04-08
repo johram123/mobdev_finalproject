@@ -39,10 +39,13 @@ export async function updateSet(set: {
   questions: string;
   answers: string;
 }) {
+  console.log("Updating set with ID:", set.fc_id);
+  console.log("New questions:", set.questions);
+  console.log("New answers:", set.answers);
   const { fc_id, questions, answers } = set;
   const { data, error } = await supabase
     .from(TABLE_NAME)
-    .update({ questions: questions, answers: answers })
+    .update({ question: questions, answer: answers })
     .match({ fc_id: fc_id });
   if (error) {
     throw error;

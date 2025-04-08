@@ -10,11 +10,12 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
 import { useSearchParams } from "expo-router/build/hooks";
 import { AntDesign } from "@expo/vector-icons";
 import { useState, useEffect, useCallback } from "react";
-import { getSet, createSet } from "../../lib/set";
+import { getSet, createSet, updateSet } from "../../lib/set";
 import DeleteHandler from "../../components/deletehandler";
 import { useAuth } from "../../lib/supabase_auth";
 import TopicHandler from "../../components/topichandler";
@@ -84,29 +85,29 @@ export default function TopicPage() {
     setIsLoading(true);
     try {
       for (const fc of fcSet) {
-        if (fc.question && fc.answer) {
+        if (fc.question && fc.answer && !fc.fc_id) {
           await createSet({
             topic_id: topicId,
             category_id: categoryId,
             questions: fc.question,
             answers: fc.answer,
           });
+        } else if (fc.question && fc.answer && fc.fc_id !== "") {
+          console.log("updating set: ", fc.fc_id);
+          await updateSet({
+            fc_id: fc.fc_id,
+            questions: fc.question,
+            answers: fc.answer,
+          });
+        } else {
+          Alert.alert("Error", "Please fill in all fields before saving.", [
+            { text: "OK" },
+          ]);
         }
       }
       fetchSet(topicId);
     } catch (error) {
       console.error("Error creating set:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSetDelete = async (fcId: string) => {
-    setIsLoading(true);
-    try {
-      fetchSet(topicId);
-    } catch (error) {
-      console.error("Error deleting set:", error);
     } finally {
       setIsLoading(false);
     }
@@ -119,7 +120,9 @@ export default function TopicPage() {
       const topId = searchParams.get("topicId") || "";
       const topName = searchParams.get("topicName") || "";
 
-      if (!topId || !topName) return;
+      if (!topId || !topName) {
+        return;
+      }
 
       if (topId !== topicId || topName !== topicName) {
         setCategoryId(catId);
@@ -204,6 +207,7 @@ export default function TopicPage() {
                             }
                           />
                         </View>
+
                         {fc.fc_id && (
                           <View style={styles.deleteButtonContainer}>
                             <DeleteHandler
@@ -215,18 +219,18 @@ export default function TopicPage() {
                         )}
                       </View>
                     ))}
+
+                    <TouchableOpacity
+                      style={styles.saveButton}
+                      onPress={setAddHandler}
+                      disabled={isLoading}
+                    >
+                      <AntDesign name="check" size={24} color="#0484D1" />
+                    </TouchableOpacity>
                   </View>
                 </ScrollView>
               </KeyboardAvoidingView>
             )}
-
-            <TouchableOpacity
-              style={styles.saveButton}
-              onPress={setAddHandler}
-              disabled={isLoading}
-            >
-              <AntDesign name="check" size={24} color="#0484D1" />
-            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -330,8 +334,9 @@ const styles = StyleSheet.create({
   },
   setText: {
     fontSize: 15,
+    width: "100%",
     fontFamily: "Unbounded_Regular",
-    textAlign: "center",
+    textAlign: "left",
     overflow: "hidden",
   },
   deleteButton: {
