@@ -22,7 +22,7 @@ const Settings = () => {
       const { data, error } = await supabase
         .from("users")
         .select("streaks")
-        .eq("user_id", user.id) // Updated to use "user_id"
+        .eq("user_id", user.id)
         .single();
 
       if (error) {
@@ -48,7 +48,6 @@ const Settings = () => {
               marginBottom: 20,
             }}
           >
-            {/* Title could go here if you want */}
           </Text>
         </View>
         <View style={styles.content}>
