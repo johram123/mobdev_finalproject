@@ -81,7 +81,6 @@ export default function TopicPage() {
       const catId = searchParams.get("categoryId") || "";
       const catName = searchParams.get("categoryName") || "";
 
-      // Only update state and refetch if values changed
       if (catId !== categoryId || catName !== categoryName) {
         setCategoryId(catId);
         setCategoryName(catName);

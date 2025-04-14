@@ -1,7 +1,13 @@
-import { useState } from "react";
-import { StyleSheet, View, Text, TextInput, TouchableOpacity } from "react-native";
+import { useCallback, useState } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 import { useAuth } from "../../lib/supabase_auth";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 
 const EditProfile = () => {
   const { user, updateUser } = useAuth(); // Assuming `updateUser` is available in your `useAuth` hook
@@ -19,11 +25,22 @@ const EditProfile = () => {
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      console.log("🟢 useFocusEffect: focused");
+
+      return () => {
+        console.log("🔴 useFocusEffect: unfocused");
+      };
+    }, [])
+  );
   return (
     <View style={styles.container}>
       <View style={{ flex: 1, backgroundColor: "#0484D1" }}>
         <View style={styles.content}>
-          <Text style={[styles.styledText, { marginTop: 30 }]}>Edit Profile</Text>
+          <Text style={[styles.styledText, { marginTop: 30 }]}>
+            Edit Profile
+          </Text>
           <TextInput
             style={styles.input}
             value={username}

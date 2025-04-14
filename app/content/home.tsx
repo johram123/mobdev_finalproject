@@ -46,13 +46,11 @@ export default function Home() {
   };
 
   const handleCategoryPage = (categoryId: string, categoryName: string) => {
-    console.log("Category ID:", categoryId);
-    console.log("Category Name:", categoryName);
     router.push(
       `/content/topicpage?categoryId=${categoryId}&categoryName=${encodeURIComponent(
         categoryName
       )}`
-    ); 
+    );
   };
 
   useEffect(() => {

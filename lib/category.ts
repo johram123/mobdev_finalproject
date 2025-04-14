@@ -53,4 +53,12 @@ export async function deleteCategory(category_id: string) {
   if (error) {
     throw error;
   }
+
+  const { data: topicsData, error: topicsError } = await supabase
+    .from("topics")
+    .delete()
+    .eq("category_id", category_id);
+  if (topicsError) {
+    throw topicsError;
+  }
 }

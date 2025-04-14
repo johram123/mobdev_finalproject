@@ -1,18 +1,53 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, Text, Button, TouchableOpacity, Image } from "react-native";
-import { useEffect } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Button,
+  TouchableOpacity,
+  Image,
+} from "react-native";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../lib/supabase_auth";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
+import supabase from "../../lib/supabase";
 
 const Profile = () => {
   const { user, signOut } = useAuth();
   const router = useRouter();
+  const [streak, setStreak] = useState<number>(0);
 
   useEffect(() => {
     if (!user) {
       router.push("/");
+    } else {
+      fetchUserStreak(user.id);
     }
   }, [user]);
+
+  useFocusEffect(
+    useCallback(() => {
+      console.log("🟢 useFocusEffect: focused");
+
+      return () => {
+        console.log("🔴 useFocusEffect: unfocused");
+      };
+    }, [])
+  );
+
+  const fetchUserStreak = async (userId: string) => {
+    const { data, error } = await supabase
+      .from("users")
+      .select("streaks")
+      .eq("user_id", userId)
+      .single();
+
+    if (data) {
+      setStreak(data.streaks || 0);
+    } else {
+      console.error("Error fetching user streak", error);
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -31,22 +66,24 @@ const Profile = () => {
               marginLeft: 20,
               marginBottom: 20,
             }}
-          >
-
-          </Text>
+          ></Text>
         </View>
         <View style={styles.content}>
           <View style={styles.categoryContainer}>
-            <Text style={[styles.styledText, { marginTop: 30 }]}>My Profile</Text>
-
-            <View style={[styles.imageContainer, {marginTop: 50 }]}>
+            <Text style={[styles.styledText, { marginTop: 30 }]}>
+              My Profile
+            </Text>
+            <Text>Streaks: {streak}</Text>
+            <View style={[styles.imageContainer, { marginTop: 50 }]}>
               <Image
                 source={require("../../assets/user.png")}
                 style={styles.userImage}
               />
             </View>
 
-            <Text style={[styles.styledText, { marginTop: 20 }]}>{username || "Firstname"}</Text>
+            <Text style={[styles.styledText, { marginTop: 20 }]}>
+              {username || "Firstname"}
+            </Text>
             <Text style={styles.styledText}>{"Lastname"}</Text>
 
             {/* buttons */}
@@ -56,19 +93,26 @@ const Profile = () => {
             >
               <View style={styles.buttonContent}>
                 <Text style={styles.styledText}>Edit Profile</Text>
-                <Image source={require("../../assets/arrow.png")} style={styles.arrowIcon} />
+                <Image
+                  source={require("../../assets/arrow.png")}
+                  style={styles.arrowIcon}
+                />
               </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.textButton}>
               <View style={styles.buttonContent}>
                 <Text style={styles.styledText}>Settings</Text>
-                <Image source={require("../../assets/arrow.png")} style={styles.arrowIcon} />
+                <Image
+                  source={require("../../assets/arrow.png")}
+                  style={styles.arrowIcon}
+                />
               </View>
             </TouchableOpacity>
-            
 
             <TouchableOpacity onPress={handleSignOut}>
-              <Text style={[styles.logOutText, { marginTop: 80 }]}>Log Out</Text>
+              <Text style={[styles.logOutText, { marginTop: 80 }]}>
+                Log Out
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -120,13 +164,13 @@ const styles = StyleSheet.create({
     borderRadius: 40,
   },
   textButton: {
-    alignSelf: "flex-start", 
-    marginLeft: 40, 
-    marginVertical: 5, 
+    alignSelf: "flex-start",
+    marginLeft: 40,
+    marginVertical: 5,
   },
   logOutText: {
     fontSize: 16,
-    color: "#d3d3d3", 
+    color: "#d3d3d3",
     textDecorationLine: "underline",
     textAlign: "center",
     fontFamily: "Unbounded_Regular",

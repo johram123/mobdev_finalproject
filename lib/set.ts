@@ -3,7 +3,6 @@ import supabase from "./supabase";
 const TABLE_NAME = "flashcardset";
 
 export async function getSet(topic_id: string) {
-  console.log("Fetching set for topic ID:", topic_id);
   const { data, error } = await supabase
     .from(TABLE_NAME)
     .select("*")

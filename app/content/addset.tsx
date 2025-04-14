@@ -12,14 +12,14 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import { useSearchParams } from "expo-router/build/hooks";
+import { useRouter, useSearchParams } from "expo-router/build/hooks";
 import { AntDesign } from "@expo/vector-icons";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { getSet, createSet, updateSet } from "../../lib/set";
 import DeleteHandler from "../../components/deletehandler";
 import { useAuth } from "../../lib/supabase_auth";
 import TopicHandler from "../../components/topichandler";
-import { useFocusEffect } from "@react-navigation/native";
+import { useIsFocused } from "@react-navigation/native";
 
 interface Set {
   fc_id: string;
@@ -29,18 +29,19 @@ interface Set {
 
 export default function TopicPage() {
   const searchParams = useSearchParams();
-  const [modalVisible, setModalVisible] = useState(false);
+  const router = useRouter();
 
   const [categoryId, setCategoryId] = useState<string>("");
-  const [categoryName, setCategoryName] = useState<string>("");
   const [topicId, setTopicId] = useState<string>("");
   const [topicName, setTopicName] = useState<string>("");
+  const [isReturned, setIsReturned] = useState<boolean>(false);
 
   const { user } = useAuth();
 
   const [fcSet, setFcSet] = useState<Set[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const isFocused = useIsFocused();
 
   const fetchSet = async (topicId: string) => {
     setIsLoading(true);
@@ -50,12 +51,15 @@ export default function TopicPage() {
         return;
       }
       const set = await getSet(topicId || "");
+      console.log("Fetched set:", set);
       if (!set || set.length === 0) {
-        console.log("Fetched set:", set);
+        console.log("No sets found for this topic");
         setFcSet([{ fc_id: "", question: "", answer: "" }]);
         return;
       }
       setFcSet(set);
+      console.log("yoyo", fcSet);
+      return set;
     } catch (error) {
       console.error("Error fetching set:", error);
     } finally {
@@ -81,6 +85,23 @@ export default function TopicPage() {
     setFcSet(updatedSet);
   };
 
+  const redirectToFlashcard = (
+    fcSet: Set[],
+    topicName: string,
+    topicId: string,
+    categoryId: string
+  ) => {
+    router.push(
+      `/content/flashcard?data=${encodeURIComponent(
+        JSON.stringify(fcSet)
+      )}&topicName=${encodeURIComponent(
+        topicName
+      )}&topicId=${encodeURIComponent(topicId)}&categoryId=${encodeURIComponent(
+        categoryId
+      )}`
+    );
+  };
+
   const setAddHandler = async () => {
     setIsLoading(true);
     try {
@@ -100,41 +121,64 @@ export default function TopicPage() {
             answers: fc.answer,
           });
         } else {
-          Alert.alert("Error", "Please fill in all fields before saving.", [
-            { text: "OK" },
-          ]);
+          throw Error;
         }
       }
+
       fetchSet(topicId);
-    } catch (error) {
-      console.error("Error creating set:", error);
+    } catch (Error) {
+      Alert.alert("Error", "Please fill in all fields before saving.", [
+        { text: "OK" },
+      ]);
     } finally {
+      setIsReturned(false);
       setIsLoading(false);
     }
   };
 
-  useFocusEffect(
-    useCallback(() => {
+  useEffect(() => {
+    if (isFocused) {
       const catId = searchParams.get("categoryId") || "";
-      const catName = searchParams.get("categoryName") || "";
       const topId = searchParams.get("topicId") || "";
       const topName = searchParams.get("topicName") || "";
+      const returnedParam = searchParams.get("returned") || "";
+      const returned = returnedParam === "true";
 
+      setIsReturned(returned);
+
+      console.log("🟢 isFocused: true");
       if (!topId || !topName) {
+        fetchSet(topicId);
         return;
       }
 
-      if (topId !== topicId || topName !== topicName) {
+      if (topId !== topicId) {
+        console.log("Changes detected, updating state...");
         setCategoryId(catId);
-        setCategoryName(catName);
         setTopicId(topId);
         setTopicName(topName);
         fetchSet(topId);
       }
-    }, [searchParams, categoryId, topicId])
-  );
 
-  return (
+      console.log("loading?", !isLoading);
+      console.log("returned?", !isReturned);
+      if (!isLoading && !isReturned) {
+        console.log("fetch length", fcSet.length);
+        if (fcSet.length >= 1 && fcSet[0].fc_id !== "") {
+          console.log("current set", fcSet);
+          console.log("current topic name", topicName);
+          redirectToFlashcard(fcSet, topName, topId, catId);
+        }
+      }
+    } else {
+      console.log("🔴 isFocused: false");
+      setIsLoading(true);
+      setTopicId("");
+      setIsReturned(false);
+    }
+  }, [isFocused, isLoading, fcSet]);
+
+  return !isLoading ? (
     <View style={styles.container}>
       <View style={{ flex: 1, backgroundColor: "white" }}>
         <View style={styles.welcomeText}>
@@ -223,7 +267,6 @@ export default function TopicPage() {
                     <TouchableOpacity
                       style={styles.saveButton}
                       onPress={setAddHandler}
-                      disabled={isLoading}
                     >
                       <AntDesign name="check" size={24} color="#0484D1" />
                     </TouchableOpacity>
@@ -235,6 +278,8 @@ export default function TopicPage() {
         </View>
       </View>
     </View>
+  ) : (
+    <ActivityIndicator size="large" color="#0484D1" style={styles.loader} />
   );
 }
 
@@ -277,7 +322,7 @@ const styles = StyleSheet.create({
   addButton: {
     position: "absolute",
     right: 30,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#dee0e0",
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -289,13 +334,13 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   saveButton: {
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#dee0e0",
     width: 40,
     height: 40,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
+    shadowColor: "black",
     shadowOpacity: 0.1,
     shadowRadius: 3,
   },

@@ -11,7 +11,7 @@ export default function TabsLayout() {
           backgroundColor: "#0484D1",
           justifyContent: "center",
           alignItems: "center",
-          height: "10%",
+          height: "5%",
           borderTopWidth: 0,
 
           elevation: 0,
@@ -70,6 +70,7 @@ export default function TabsLayout() {
           href: null,
         }}
       />
+      <Tabs.Screen name="flashcard" options={{ href: null }} />
     </Tabs>
   );
 }
